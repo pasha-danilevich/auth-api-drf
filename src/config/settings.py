@@ -41,38 +41,14 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'rest_framework.authtoken',
+    
     'djoser',
 
     'apps.api',
+    'apps.user'
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication'
-    ]
-}
 
-SIMPLE_JWT = {
-   'AUTH_HEADER_TYPES': ('JWT', 'Beare'),
-}
-
-JWT_AUTH = {
-    # кол-во дней для того
-    # чтобы зайти без пароля
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2), 
-    'JWT_ALLOW_REFRESH': True,
-    # после этого времени пароль обязателен
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7)  # default
-}
-
-
-DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': '#/activate/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': True,
-    'SERIALIZERS': {},
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -147,12 +123,73 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
 STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# AUTH
+
+# AUTH_USER_MODEL = 'apps.user.User'
+# AUTHENTICATION_BACKENDS = ('apps.user.backends.AuthBackend',)
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
+    ]
+}
+SIMPLE_JWT = {
+    # кол-во дней для того
+    # чтобы зайти без пароля
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=7),
+    # после этого времени пароль обязателен
+    "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=30),
+    # при запросе на обновление токена, ЕСЛИ False, будет 
+    # возвращен только новый access-токен 
+    "ROTATE_REFRESH_TOKENS": True,
+    # будет ли refresh-токен добавлен в черный список после его обновления
+    "BLACKLIST_AFTER_ROTATION": False,
+    "UPDATE_LAST_LOGIN": False,
+
+    'AUTH_HEADER_TYPES': ('JWT', 'Beare'),
+
+
+    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
+    "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
+    "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
+    "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
+    "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
+    "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+}
+
+
+
+DJOSER = {
+    # PASSWORD_RESET
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    'SET_PASSWORD_RETYPE': True,
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    
+    
+    # вернет неверный ответ на запрос HTTP 400, если адрес электронной почты, 
+    # указанный для запроса на сброс пароля, не существует в базе данных
+    'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
+    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    
+    # EMAIL
+    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_CONFIRMATION_EMAIL': True,
+    'ACTIVATION_URL': '#/activate/{uid}/{token}', # так будет выглядить url в писме на почту
+    
+    'TOKEN_MODEL': False, # we use only JWT
+}
+
+# EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'django-backend@yandex.ru'
+EMAIL_HOST_PASSWORD = 'yumetfpebogtnbpk'
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
